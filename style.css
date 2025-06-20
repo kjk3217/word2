@@ -102,6 +102,11 @@ body {
     color: white;
 }
 
+.btn-info {
+    background: linear-gradient(45deg, #36d1dc, #5b86e5);
+    color: white;
+}
+
 /* 홈 화면 */
 .button-group {
     display: flex;
@@ -135,7 +140,8 @@ body {
 .game-controls {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 #question-counter {
@@ -336,6 +342,14 @@ body {
     font-size: 1.3rem;
     font-weight: 500;
     color: #666;
+    margin-bottom: 5px;
+}
+
+.question-display .hint-text {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #888;
+    font-style: italic;
 }
 
 /* 모달 */
