@@ -453,6 +453,11 @@ body {
         font-size: 2rem;
     }
     
+    .game-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
     .char-token {
         width: 60px;
         height: 60px;
@@ -481,5 +486,11 @@ body {
     
     .modal-actions {
         flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+        margin: 0;
     }
 }
