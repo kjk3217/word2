@@ -449,10 +449,48 @@ function showPasswordModal(title, placeholder, callback) {
 }
 
 function showAdminPage() {
-    console.log('관리자 페이지 표시');
+    console.log('=== 관리자 페이지 표시 시작 ===');
     isAdmin = true;
     showScreen('admin');
-    renderQuestions();
+    
+    // 화면 전환 후 요소들이 제대로 로드되었는지 확인
+    setTimeout(() => {
+        console.log('관리자 페이지 요소 확인:');
+        const questionInput = document.getElementById('new-question-input');
+        const answerInput = document.getElementById('new-answer-input');
+        const hintInput = document.getElementById('new-hint-input');
+        const saveBtn = document.getElementById('save-new-question-btn');
+        
+        console.log({
+            questionInput: !!questionInput,
+            answerInput: !!answerInput,
+            hintInput: !!hintInput,
+            saveBtn: !!saveBtn,
+            saveBtnOnclick: saveBtn ? saveBtn.onclick : 'null'
+        });
+        
+        // 버튼에 onclick 이벤트 강제로 재할당
+        if (saveBtn) {
+            console.log('버튼에 onclick 이벤트 재할당');
+            saveBtn.onclick = function(event) {
+                console.log('onclick 이벤트 발생');
+                event.preventDefault();
+                window.addNewQuestion();
+                return false;
+            };
+            
+            // 클릭 이벤트 리스너도 추가
+            saveBtn.addEventListener('click', function(event) {
+                console.log('addEventListener 이벤트 발생');
+                event.preventDefault();
+                window.addNewQuestion();
+                return false;
+            });
+        }
+        
+        renderQuestions();
+        console.log('=== 관리자 페이지 표시 완료 ===');
+    }, 200);
 }
 
 function showHint() {
@@ -789,5 +827,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    console.log('모든 이벤트 리스너 등록 완료'); // 디버깅용
+    console.log('모든 이벤트 리스너 등록 완료');
+    
+    // 페이지 로드 완료 후 전역 함수들이 제대로 등록되었는지 확인
+    console.log('전역 함수 확인:', {
+        addNewQuestion: typeof window.addNewQuestion,
+        editQuestion: typeof window.editQuestion,
+        saveQuestion: typeof window.saveQuestion,
+        deleteQuestionConfirm: typeof window.deleteQuestionConfirm
+    });
+    
+    // 페이지에 테스트 버튼 추가 (디버깅용)
+    if (document.getElementById('home-screen')) {
+        const testBtn = document.createElement('button');
+        testBtn.textContent = '버튼 테스트';
+        testBtn.style.position = 'fixed';
+        testBtn.style.top = '10px';
+        testBtn.style.right = '10px';
+        testBtn.style.zIndex = '9999';
+        testBtn.style.padding = '5px 10px';
+        testBtn.style.fontSize = '12px';
+        testBtn.onclick = window.testAddButton;
+        document.body.appendChild(testBtn);
+    }
 });
