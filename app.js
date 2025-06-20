@@ -453,6 +453,19 @@ function showAdminPage() {
     isAdmin = true;
     showScreen('admin');
     renderQuestions();
+    
+    // 관리자 페이지 버튼 이벤트 리스너 재등록
+    setTimeout(() => {
+        const saveBtn = document.getElementById('save-new-question-btn');
+        if (saveBtn && !saveBtn.dataset.listenerAdded) {
+            console.log('문제 추가 버튼 이벤트 리스너 등록');
+            saveBtn.addEventListener('click', function() {
+                console.log('문제 추가 버튼 클릭됨');
+                window.addNewQuestion();
+            });
+            saveBtn.dataset.listenerAdded = 'true';
+        }
+    }, 100);
 }
 
 function showHint() {
@@ -477,15 +490,21 @@ function changePassword() {
 
 // 관리자 페이지 문제 렌더링
 function renderQuestions() {
+    console.log('문제 렌더링 시작, 문제 개수:', questions.length);
     const container = document.getElementById('questions-list');
     const emptyMessage = document.getElementById('empty-message');
     
-    if (!container) return;
+    if (!container) {
+        console.error('questions-list 컨테이너를 찾을 수 없습니다');
+        return;
+    }
     
     container.innerHTML = '';
     
     if (questions.length === 0) {
         if (emptyMessage) emptyMessage.style.display = 'block';
+        console.log('빈 메시지 표시');
+        updateAddButtonState();
         return;
     }
     
@@ -494,6 +513,12 @@ function renderQuestions() {
     questions.forEach((question, index) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-item';
+        
+        // 특수문자 이스케이프 처리
+        const escapedQuestion = question.question.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedAnswer = question.answer.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedHint = (question.hint || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
         questionDiv.innerHTML = `
             <div class="question-item-header">
                 <div class="question-info">
@@ -505,27 +530,29 @@ function renderQuestions() {
                     </div>
                 </div>
                 <div class="question-actions-inline">
-                    <button class="btn btn-secondary" onclick="editQuestion(${question.id})">수정</button>
-                    <button class="btn btn-danger" onclick="deleteQuestionConfirm(${question.id})">삭제</button>
+                    <button class="btn btn-secondary" onclick="window.editQuestion(${question.id})">수정</button>
+                    <button class="btn btn-danger" onclick="window.deleteQuestionConfirm(${question.id})">삭제</button>
                 </div>
             </div>
             <div class="edit-form" id="form-${question.id}" style="display: none;">
                 <div class="question-form">
-                    <input type="text" name="question" value="${question.question}" placeholder="질문을 입력하세요">
-                    <input type="text" name="answer" value="${question.answer}" placeholder="정답을 입력하세요">
-                    <input type="text" name="hint" value="${question.hint || ''}" placeholder="힌트를 입력하세요 (선택사항)">
+                    <input type="text" name="question" value="${escapedQuestion}" placeholder="질문을 입력하세요">
+                    <input type="text" name="answer" value="${escapedAnswer}" placeholder="정답을 입력하세요">
+                    <input type="text" name="hint" value="${escapedHint}" placeholder="힌트를 입력하세요 (선택사항)">
                 </div>
                 <div class="question-actions">
-                    <button class="btn btn-success" onclick="saveQuestion(${question.id})" id="save-${question.id}">저장</button>
-                    <button class="btn btn-warning" onclick="cancelEdit(${question.id})" id="cancel-${question.id}">취소</button>
+                    <button class="btn btn-success" onclick="window.saveQuestion(${question.id})" id="save-${question.id}">저장</button>
+                    <button class="btn btn-warning" onclick="window.cancelEdit(${question.id})" id="cancel-${question.id}">취소</button>
                 </div>
             </div>
         `;
         container.appendChild(questionDiv);
+        console.log(`문제 ${index + 1} 렌더링 완료`);
     });
     
     // 문제 추가 버튼 상태 업데이트
     updateAddButtonState();
+    console.log('문제 렌더링 완료');
 }
 
 function updateAddButtonState() {
@@ -727,7 +754,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (saveNewQuestionBtn) {
-        saveNewQuestionBtn.addEventListener('click', addNewQuestion);
+        saveNewQuestionBtn.addEventListener('click', function() {
+            console.log('문제 추가 버튼 이벤트 리스너 실행');
+            window.addNewQuestion();
+        });
     }
     
     // 결과 모달 버튼들
