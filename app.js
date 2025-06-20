@@ -8,31 +8,60 @@ let answerSortable = null;
 
 // 화면 관리
 function showScreen(screenName) {
+    console.log('화면 전환:', screenName);
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
-    document.getElementById(`${screenName}-screen`).classList.add('active');
-    currentScreen = screenName;
+    const targetScreen = document.getElementById(`${screenName}-screen`);
+    if (targetScreen) {
+        targetScreen.classList.add('active');
+        currentScreen = screenName;
+    } else {
+        console.error('화면을 찾을 수 없습니다:', screenName);
+    }
 }
 
 // 로컬 스토리지 관리
 function saveData() {
-    localStorage.setItem('wordgame_questions', JSON.stringify(questions));
+    try {
+        localStorage.setItem('wordgame_questions', JSON.stringify(questions));
+        console.log('데이터 저장 완료');
+    } catch (error) {
+        console.error('데이터 저장 실패:', error);
+    }
 }
 
 function loadData() {
-    const saved = localStorage.getItem('wordgame_questions');
-    if (saved) {
-        questions = JSON.parse(saved);
+    try {
+        const saved = localStorage.getItem('wordgame_questions');
+        if (saved) {
+            questions = JSON.parse(saved);
+            console.log('데이터 로드 완료:', questions.length, '개 문제');
+        } else {
+            console.log('저장된 데이터가 없습니다');
+        }
+    } catch (error) {
+        console.error('데이터 로드 실패:', error);
+        questions = [];
     }
 }
 
 function savePassword(password) {
-    localStorage.setItem('wordgame_password', password);
+    try {
+        localStorage.setItem('wordgame_password', password);
+        console.log('비밀번호 저장 완료');
+    } catch (error) {
+        console.error('비밀번호 저장 실패:', error);
+    }
 }
 
 function getPassword() {
-    return localStorage.getItem('wordgame_password');
+    try {
+        return localStorage.getItem('wordgame_password');
+    } catch (error) {
+        console.error('비밀번호 로드 실패:', error);
+        return null;
+    }
 }
 
 // 문제 관리
@@ -48,12 +77,14 @@ function addQuestion(questionText, answerText) {
         answer: answerText
     });
     saveData();
+    console.log('문제 추가 완료');
     return true;
 }
 
 function deleteQuestion(id) {
     questions = questions.filter(q => q.id !== id);
     saveData();
+    console.log('문제 삭제 완료');
 }
 
 function updateQuestion(id, questionText, answerText) {
@@ -62,11 +93,13 @@ function updateQuestion(id, questionText, answerText) {
         question.question = questionText;
         question.answer = answerText;
         saveData();
+        console.log('문제 수정 완료');
     }
 }
 
 // 게임 로직
 function startGame() {
+    console.log('게임 시작 시도');
     if (questions.length === 0) {
         alert('등록된 문제가 없습니다. 관리자 페이지에서 문제를 등록해주세요.');
         return;
@@ -84,8 +117,16 @@ function loadQuestion() {
     }
     
     const question = questions[currentQuestionIndex];
-    document.getElementById('question-text').textContent = question.question;
-    document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+    const questionElement = document.getElementById('question-text');
+    const counterElement = document.getElementById('question-counter');
+    
+    if (questionElement) {
+        questionElement.textContent = question.question;
+    }
+    
+    if (counterElement) {
+        counterElement.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+    }
     
     setupDragAndDrop(question.answer);
 }
@@ -93,6 +134,11 @@ function loadQuestion() {
 function setupDragAndDrop(answer) {
     const answerArea = document.getElementById('answer-area');
     const dragPool = document.getElementById('drag-pool');
+    
+    if (!answerArea || !dragPool) {
+        console.error('게임 요소를 찾을 수 없습니다');
+        return;
+    }
     
     // 기존 내용 클리어
     answerArea.innerHTML = '<div class="answer-placeholder">여기에 글자를 끌어다 놓으세요</div>';
@@ -137,44 +183,54 @@ function setupDragAndDrop(answer) {
         answerSortable.destroy();
     }
     
-    sortableInstance = Sortable.create(dragPool, {
-        group: {
-            name: 'shared',
-            pull: 'clone',
-            put: false
-        },
-        animation: 150,
-        sort: false,
-        onStart: function(evt) {
-            evt.item.classList.add('dragging');
-        },
-        onEnd: function(evt) {
-            evt.item.classList.remove('dragging');
+    // SortableJS 사용 가능 여부 확인
+    if (typeof Sortable !== 'undefined') {
+        try {
+            sortableInstance = Sortable.create(dragPool, {
+                group: {
+                    name: 'shared',
+                    pull: 'clone',
+                    put: false
+                },
+                animation: 150,
+                sort: false,
+                onStart: function(evt) {
+                    evt.item.classList.add('dragging');
+                },
+                onEnd: function(evt) {
+                    evt.item.classList.remove('dragging');
+                }
+            });
+            
+            answerSortable = Sortable.create(answerArea, {
+                group: {
+                    name: 'shared',
+                    pull: true,
+                    put: true
+                },
+                animation: 150,
+                onAdd: function(evt) {
+                    answerArea.classList.add('has-content');
+                    // 원본 요소 제거 (복제본만 남김)
+                    const originalItem = dragPool.querySelector(`[data-id="${evt.item.dataset.id}"]`);
+                    if (originalItem && originalItem !== evt.item) {
+                        originalItem.remove();
+                    }
+                },
+                onChange: function(evt) {
+                    if (answerArea.children.length === 0) {
+                        answerArea.classList.remove('has-content');
+                        answerArea.innerHTML = '<div class="answer-placeholder">여기에 글자를 끌어다 놓으세요</div>';
+                    }
+                }
+            });
+            console.log('Sortable 초기화 완료');
+        } catch (error) {
+            console.error('Sortable 초기화 실패:', error);
         }
-    });
-    
-    answerSortable = Sortable.create(answerArea, {
-        group: {
-            name: 'shared',
-            pull: true,
-            put: true
-        },
-        animation: 150,
-        onAdd: function(evt) {
-            answerArea.classList.add('has-content');
-            // 원본 요소 제거 (복제본만 남김)
-            const originalItem = dragPool.querySelector(`[data-id="${evt.item.dataset.id}"]`);
-            if (originalItem && originalItem !== evt.item) {
-                originalItem.remove();
-            }
-        },
-        onChange: function(evt) {
-            if (answerArea.children.length === 0) {
-                answerArea.classList.remove('has-content');
-                answerArea.innerHTML = '<div class="answer-placeholder">여기에 글자를 끌어다 놓으세요</div>';
-            }
-        }
-    });
+    } else {
+        console.error('SortableJS 라이브러리를 찾을 수 없습니다');
+    }
 }
 
 function shuffleArray(array) {
@@ -186,6 +242,11 @@ function shuffleArray(array) {
 
 function checkAnswer() {
     const answerArea = document.getElementById('answer-area');
+    if (!answerArea) {
+        console.error('답 영역을 찾을 수 없습니다');
+        return;
+    }
+    
     const tokens = answerArea.querySelectorAll('.char-token');
     
     if (tokens.length === 0) {
@@ -196,15 +257,21 @@ function checkAnswer() {
     const userAnswer = Array.from(tokens).map(token => token.textContent).join('');
     const correctAnswer = questions[currentQuestionIndex].answer;
     
+    console.log('사용자 답:', userAnswer, '정답:', correctAnswer);
+    
+    const resultTitle = document.getElementById('result-title');
+    const resultMessage = document.getElementById('result-message');
+    const resultNextBtn = document.getElementById('result-next-btn');
+    
     if (userAnswer === correctAnswer) {
-        document.getElementById('result-title').textContent = '정답!';
-        document.getElementById('result-message').textContent = '잘했어요!';
-        document.getElementById('result-next-btn').style.display = 'inline-block';
+        if (resultTitle) resultTitle.textContent = '정답!';
+        if (resultMessage) resultMessage.textContent = '잘했어요!';
+        if (resultNextBtn) resultNextBtn.style.display = 'inline-block';
         showModal('result-modal');
     } else {
-        document.getElementById('result-title').textContent = '오답!';
-        document.getElementById('result-message').textContent = '다시 도전해보세요!';
-        document.getElementById('result-next-btn').style.display = 'none';
+        if (resultTitle) resultTitle.textContent = '오답!';
+        if (resultMessage) resultMessage.textContent = '다시 도전해보세요!';
+        if (resultNextBtn) resultNextBtn.style.display = 'none';
         showModal('result-modal');
         
         // 글자 재섞기
@@ -217,6 +284,11 @@ function checkAnswer() {
 function resetAnswer() {
     const answerArea = document.getElementById('answer-area');
     const dragPool = document.getElementById('drag-pool');
+    
+    if (!answerArea || !dragPool) {
+        console.error('게임 요소를 찾을 수 없습니다');
+        return;
+    }
     
     // 답 영역의 토큰들을 드래그 풀로 되돌리기
     const tokens = answerArea.querySelectorAll('.char-token');
@@ -243,15 +315,26 @@ function nextQuestion() {
 
 // 모달 관리
 function showModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('active');
+        console.log('모달 표시:', modalId);
+    } else {
+        console.error('모달을 찾을 수 없습니다:', modalId);
+    }
 }
 
 function hideModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        console.log('모달 숨김:', modalId);
+    }
 }
 
 // 관리자 인증
 function checkAdminAccess() {
+    console.log('관리자 접근 시도');
     const savedPassword = getPassword();
     
     if (!savedPassword) {
@@ -273,12 +356,22 @@ function checkAdminAccess() {
 }
 
 function showPasswordModal(title, placeholder, callback) {
-    document.getElementById('password-modal-title').textContent = title;
-    document.getElementById('password-input').placeholder = placeholder;
-    document.getElementById('password-input').value = '';
+    const modalTitle = document.getElementById('password-modal-title');
+    const passwordInput = document.getElementById('password-input');
+    
+    if (modalTitle) modalTitle.textContent = title;
+    if (passwordInput) {
+        passwordInput.placeholder = placeholder;
+        passwordInput.value = '';
+    }
     
     const confirmBtn = document.getElementById('password-confirm-btn');
     const cancelBtn = document.getElementById('password-cancel-btn');
+    
+    if (!confirmBtn || !cancelBtn) {
+        console.error('모달 버튼을 찾을 수 없습니다');
+        return;
+    }
     
     // 기존 이벤트 리스너 제거
     const newConfirmBtn = confirmBtn.cloneNode(true);
@@ -302,17 +395,20 @@ function showPasswordModal(title, placeholder, callback) {
     });
     
     // Enter 키로 확인
-    document.getElementById('password-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            newConfirmBtn.click();
-        }
-    });
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                newConfirmBtn.click();
+            }
+        });
+    }
     
     showModal('password-modal');
-    document.getElementById('password-input').focus();
+    if (passwordInput) passwordInput.focus();
 }
 
 function showAdminPage() {
+    console.log('관리자 페이지 표시');
     isAdmin = true;
     showScreen('admin');
     renderQuestions();
