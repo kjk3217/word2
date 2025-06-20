@@ -175,7 +175,7 @@ function setupDragAndDrop(answer) {
         '교', '뇨', '됴', '료', '묘', '뵤', '쇼', '요', '죠', '쵸', '쿄', '툐', '표', '효',
         '규', '뉴', '듀', '류', '뮤', '뷰', '슈', '유', '쥬', '츄', '큐', '튜', '퓨', '휴',
         '강', '낭', '당', '랑', '망', '방', '상', '앙', '장', '창', '캉', '탕', '팡', '항',
-        '곳', '놋', '돗', '롯', '못', '봇', '솟', '옷', '촛', '콧', '톳', '폿', '흣'
+        '곳', '놋', '돗', '롯', '못', '봇', '솟', '옷', '좃', '촛', '콧', '톳', '폿', '흣'
     ];
     
     // 정답에 없는 방해 글자 5개 선택
@@ -293,7 +293,10 @@ function checkAnswer() {
         // 정답인 경우
         if (resultTitle) resultTitle.textContent = '정답!';
         if (resultMessage) resultMessage.textContent = '잘했어요!';
-        if (resultNextBtn) resultNextBtn.style.display = 'inline-block';
+        if (resultNextBtn) {
+            resultNextBtn.style.display = 'inline-block';
+            resultNextBtn.textContent = '다음 문제';
+        }
         if (resultRetryBtn) resultRetryBtn.style.display = 'none';
         showModal('result-modal');
     } else {
@@ -475,50 +478,68 @@ function changePassword() {
 // 관리자 페이지 문제 렌더링
 function renderQuestions() {
     const container = document.getElementById('questions-list');
+    const emptyMessage = document.getElementById('empty-message');
+    
+    if (!container) return;
+    
     container.innerHTML = '';
+    
+    if (questions.length === 0) {
+        if (emptyMessage) emptyMessage.style.display = 'block';
+        return;
+    }
+    
+    if (emptyMessage) emptyMessage.style.display = 'none';
     
     questions.forEach((question, index) => {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-item';
         questionDiv.innerHTML = `
-            <div class="question-display" id="display-${question.id}">
-                <div class="question-text">Q${index + 1}: ${question.question}</div>
-                <div class="answer-text">정답: ${question.answer}</div>
-                <div class="hint-text">힌트: ${question.hint || '(힌트 없음)'}</div>
+            <div class="question-item-header">
+                <div class="question-info">
+                    <div class="question-number">문제 ${index + 1}</div>
+                    <div class="question-content">
+                        <div class="question-text">Q: ${question.question}</div>
+                        <div class="answer-text">A: ${question.answer}</div>
+                        <div class="hint-text">힌트: ${question.hint || '(없음)'}</div>
+                    </div>
+                </div>
+                <div class="question-actions-inline">
+                    <button class="btn btn-secondary" onclick="editQuestion(${question.id})">수정</button>
+                    <button class="btn btn-danger" onclick="deleteQuestionConfirm(${question.id})">삭제</button>
+                </div>
             </div>
-            <div class="question-form" id="form-${question.id}" style="display: none;">
-                <input type="text" name="question" value="${question.question}" placeholder="질문을 입력하세요">
-                <input type="text" name="answer" value="${question.answer}" placeholder="정답을 입력하세요">
-                <input type="text" name="hint" value="${question.hint || ''}" placeholder="힌트를 입력하세요 (선택사항)">
-            </div>
-            <div class="question-actions">
-                <button class="btn btn-secondary" onclick="editQuestion(${question.id})">수정</button>
-                <button class="btn btn-success" onclick="saveQuestion(${question.id})" id="save-${question.id}" style="display: none;">저장</button>
-                <button class="btn btn-warning" onclick="cancelEdit(${question.id})" id="cancel-${question.id}" style="display: none;">취소</button>
-                <button class="btn btn-danger" onclick="deleteQuestionConfirm(${question.id})">삭제</button>
+            <div class="edit-form" id="form-${question.id}" style="display: none;">
+                <div class="question-form">
+                    <input type="text" name="question" value="${question.question}" placeholder="질문을 입력하세요">
+                    <input type="text" name="answer" value="${question.answer}" placeholder="정답을 입력하세요">
+                    <input type="text" name="hint" value="${question.hint || ''}" placeholder="힌트를 입력하세요 (선택사항)">
+                </div>
+                <div class="question-actions">
+                    <button class="btn btn-success" onclick="saveQuestion(${question.id})" id="save-${question.id}">저장</button>
+                    <button class="btn btn-warning" onclick="cancelEdit(${question.id})" id="cancel-${question.id}">취소</button>
+                </div>
             </div>
         `;
         container.appendChild(questionDiv);
     });
     
-    // 새 문제 추가 폼
-    if (questions.length < 5) {
-        const addForm = document.createElement('div');
-        addForm.className = 'question-item';
-        addForm.innerHTML = `
-            <div class="question-form" id="new-question-form">
-                <input type="text" name="question" placeholder="새 질문을 입력하세요">
-                <input type="text" name="answer" placeholder="정답을 입력하세요">
-                <input type="text" name="hint" placeholder="힌트를 입력하세요 (선택사항)">
-            </div>
-            <div class="question-actions">
-                <button class="btn btn-success" onclick="addNewQuestion()">저장</button>
-                <button class="btn btn-secondary" onclick="hideAddForm()">취소</button>
-            </div>
-        `;
-        addForm.style.display = 'none';
-        addForm.id = 'add-question-form';
-        container.appendChild(addForm);
+    // 문제 추가 버튼 상태 업데이트
+    updateAddButtonState();
+}
+
+function updateAddButtonState() {
+    const saveBtn = document.getElementById('save-new-question-btn');
+    if (saveBtn) {
+        if (questions.length >= 5) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = '최대 5문제 등록됨';
+            saveBtn.style.opacity = '0.5';
+        } else {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '문제 추가';
+            saveBtn.style.opacity = '1';
+        }
     }
 }
 
@@ -627,6 +648,15 @@ window.addNewQuestion = function() {
     }
     
     if (addQuestion(questionText, answerText, hintText)) {
+        // 폼 초기화
+        form.querySelector('input[name="question"]').value = '';
+        form.querySelector('input[name="answer"]').value = '';
+        form.querySelector('input[name="hint"]').value = '';
+        
+        // 폼 숨기기
+        hideAddForm();
+        
+        // 문제 목록 다시 렌더링
         renderQuestions();
     }
 };
@@ -686,7 +716,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 관리자 화면 버튼들
     const changePassBtn = document.getElementById('change-password-btn');
     const adminHomeBtn = document.getElementById('admin-home-btn');
-    const addQuestionBtn = document.getElementById('add-question-btn');
+    const saveNewQuestionBtn = document.getElementById('save-new-question-btn');
     
     if (changePassBtn) {
         changePassBtn.addEventListener('click', changePassword);
@@ -696,8 +726,8 @@ document.addEventListener('DOMContentLoaded', function() {
         adminHomeBtn.addEventListener('click', () => showScreen('home'));
     }
     
-    if (addQuestionBtn) {
-        addQuestionBtn.addEventListener('click', showAddForm);
+    if (saveNewQuestionBtn) {
+        saveNewQuestionBtn.addEventListener('click', addNewQuestion);
     }
     
     // 결과 모달 버튼들
