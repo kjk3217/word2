@@ -65,7 +65,7 @@ function getPassword() {
 }
 
 // 문제 관리
-function addQuestion(questionText, answerText) {
+function addQuestion(questionText, answerText, hintText = '') {
     if (questions.length >= 5) {
         alert('최대 5문제까지만 등록할 수 있습니다.');
         return false;
@@ -74,7 +74,8 @@ function addQuestion(questionText, answerText) {
     questions.push({
         id: Date.now(),
         question: questionText,
-        answer: answerText
+        answer: answerText,
+        hint: hintText
     });
     saveData();
     console.log('문제 추가 완료');
@@ -87,11 +88,12 @@ function deleteQuestion(id) {
     console.log('문제 삭제 완료');
 }
 
-function updateQuestion(id, questionText, answerText) {
+function updateQuestion(id, questionText, answerText, hintText = '') {
     const question = questions.find(q => q.id === id);
     if (question) {
         question.question = questionText;
         question.answer = answerText;
+        question.hint = hintText;
         saveData();
         console.log('문제 수정 완료');
     }
@@ -119,6 +121,7 @@ function loadQuestion() {
     const question = questions[currentQuestionIndex];
     const questionElement = document.getElementById('question-text');
     const counterElement = document.getElementById('question-counter');
+    const hintBtn = document.getElementById('hint-btn');
     
     if (questionElement) {
         questionElement.textContent = question.question;
@@ -126,6 +129,15 @@ function loadQuestion() {
     
     if (counterElement) {
         counterElement.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+    }
+    
+    // 힌트 버튼 표시/숨김
+    if (hintBtn) {
+        if (question.hint && question.hint.trim()) {
+            hintBtn.style.display = 'inline-block';
+        } else {
+            hintBtn.style.display = 'none';
+        }
     }
     
     setupDragAndDrop(question.answer);
@@ -148,16 +160,29 @@ function setupDragAndDrop(answer) {
     // 정답 글자들
     const answerChars = answer.split('');
     
-    // 방해 글자들 생성 (한글 자모)
-    const distractors = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 
-                        'ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ',
-                        '가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하'];
+    // 방해 글자들 생성 (한글 음절)
+    const distractors = [
+        '가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하',
+        '거', '너', '더', '러', '머', '버', '서', '어', '저', '처', '커', '터', '퍼', '허',
+        '고', '노', '도', '로', '모', '보', '소', '오', '조', '초', '코', '토', '포', '호',
+        '구', '누', '두', '루', '무', '부', '수', '우', '주', '추', '쿠', '투', '푸', '후',
+        '그', '느', '드', '르', '므', '브', '스', '으', '즈', '츠', '크', '트', '프', '흐',
+        '기', '니', '디', '리', '미', '비', '시', '이', '지', '치', '키', '티', '피', '히',
+        '개', '네', '데', '레', '메', '베', '세', '에', '제', '체', '케', '테', '페', '헤',
+        '게', '느', '데', '레', '메', '베', '세', '에', '제', '체', '케', '테', '페', '헤',
+        '갸', '냐', '댜', '랴', '먀', '뱌', '샤', '야', '쟈', '챠', '캬', '탸', '퍄', '햐',
+        '겨', '녀', '뎌', '려', '며', '벼', '셔', '여', '져', '쳐', '켜', '텨', '펴', '혀',
+        '교', '뇨', '됴', '료', '묘', '뵤', '쇼', '요', '죠', '쵸', '쿄', '툐', '표', '효',
+        '규', '뉴', '듀', '류', '뮤', '뷰', '슈', '유', '쥬', '츄', '큐', '튜', '퓨', '휴',
+        '강', '낭', '당', '랑', '망', '방', '상', '앙', '장', '창', '캉', '탕', '팡', '항',
+        '곳', '놋', '돗', '롯', '못', '봇', '솟', '옷', '좃', '촛', '콧', '톳', '폿', '흣'
+    ];
     
-    // 정답에 없는 방해 글자 3개 선택
+    // 정답에 없는 방해 글자 5개 선택
     const availableDistractors = distractors.filter(char => !answerChars.includes(char));
     const selectedDistractors = [];
     
-    for (let i = 0; i < 3 && i < availableDistractors.length; i++) {
+    for (let i = 0; i < 5 && i < availableDistractors.length; i++) {
         const randomIndex = Math.floor(Math.random() * availableDistractors.length);
         selectedDistractors.push(availableDistractors.splice(randomIndex, 1)[0]);
     }
@@ -414,6 +439,19 @@ function showAdminPage() {
     renderQuestions();
 }
 
+function showHint() {
+    const question = questions[currentQuestionIndex];
+    if (question && question.hint && question.hint.trim()) {
+        const hintText = document.getElementById('hint-text');
+        if (hintText) {
+            hintText.textContent = question.hint;
+        }
+        showModal('hint-modal');
+    } else {
+        alert('이 문제에는 힌트가 없습니다.');
+    }
+}
+
 function changePassword() {
     showPasswordModal('새 비밀번호 입력', '새 비밀번호를 입력하세요', (password) => {
         savePassword(password);
@@ -433,10 +471,12 @@ function renderQuestions() {
             <div class="question-display" id="display-${question.id}">
                 <div class="question-text">Q${index + 1}: ${question.question}</div>
                 <div class="answer-text">정답: ${question.answer}</div>
+                <div class="hint-text">힌트: ${question.hint || '(힌트 없음)'}</div>
             </div>
             <div class="question-form" id="form-${question.id}" style="display: none;">
                 <input type="text" name="question" value="${question.question}" placeholder="질문을 입력하세요">
                 <input type="text" name="answer" value="${question.answer}" placeholder="정답을 입력하세요">
+                <input type="text" name="hint" value="${question.hint || ''}" placeholder="힌트를 입력하세요 (선택사항)">
             </div>
             <div class="question-actions">
                 <button class="btn btn-secondary" onclick="editQuestion(${question.id})">수정</button>
@@ -456,6 +496,7 @@ function renderQuestions() {
             <div class="question-form" id="new-question-form">
                 <input type="text" name="question" placeholder="새 질문을 입력하세요">
                 <input type="text" name="answer" placeholder="정답을 입력하세요">
+                <input type="text" name="hint" placeholder="힌트를 입력하세요 (선택사항)">
             </div>
             <div class="question-actions">
                 <button class="btn btn-success" onclick="addNewQuestion()">저장</button>
@@ -539,13 +580,14 @@ window.saveQuestion = function(id) {
     const form = document.getElementById(`form-${id}`);
     const questionText = form.querySelector('input[name="question"]').value.trim();
     const answerText = form.querySelector('input[name="answer"]').value.trim();
+    const hintText = form.querySelector('input[name="hint"]').value.trim();
     
     if (!questionText || !answerText) {
         alert('질문과 정답을 모두 입력해주세요.');
         return;
     }
     
-    updateQuestion(id, questionText, answerText);
+    updateQuestion(id, questionText, answerText, hintText);
     renderQuestions();
 };
 
@@ -564,13 +606,14 @@ window.addNewQuestion = function() {
     const form = document.getElementById('new-question-form');
     const questionText = form.querySelector('input[name="question"]').value.trim();
     const answerText = form.querySelector('input[name="answer"]').value.trim();
+    const hintText = form.querySelector('input[name="hint"]').value.trim();
     
     if (!questionText || !answerText) {
         alert('질문과 정답을 모두 입력해주세요.');
         return;
     }
     
-    if (addQuestion(questionText, answerText)) {
+    if (addQuestion(questionText, answerText, hintText)) {
         renderQuestions();
     }
 };
@@ -609,6 +652,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const endBtn = document.getElementById('end-game-btn');
     const checkBtn = document.getElementById('check-answer-btn');
     const resetBtn = document.getElementById('reset-answer-btn');
+    const hintBtn = document.getElementById('hint-btn');
     
     if (endBtn) {
         endBtn.addEventListener('click', () => showScreen('home'));
@@ -620,6 +664,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (resetBtn) {
         resetBtn.addEventListener('click', resetAnswer);
+    }
+    
+    if (hintBtn) {
+        hintBtn.addEventListener('click', showHint);
     }
     
     // 관리자 화면 버튼들
@@ -660,6 +708,14 @@ document.addEventListener('DOMContentLoaded', function() {
         completeHomeBtn.addEventListener('click', () => {
             hideModal('complete-modal');
             showScreen('home');
+        });
+    }
+    
+    // 힌트 모달 버튼
+    const hintCloseBtn = document.getElementById('hint-close-btn');
+    if (hintCloseBtn) {
+        hintCloseBtn.addEventListener('click', () => {
+            hideModal('hint-modal');
         });
     }
     
