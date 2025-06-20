@@ -276,12 +276,88 @@ body {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
+.questions-container h4 {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 30px 0 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.add-question-section {
+    background: rgba(255,255,255,0.95);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.add-question-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.add-question-actions .btn {
+    font-size: 1.2rem;
+    padding: 10px 20px;
+}
+
+#questions-list-container {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+}
+
+#empty-message {
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-style: italic;
+    padding: 20px;
+}
+
 .question-item {
-    background: white;
+    background: rgba(255,255,255,0.9);
     margin-bottom: 15px;
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.question-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.question-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.question-info {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.question-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.question-content {
+    margin-bottom: 5px;
+}
+
+.question-actions-inline {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .question-form {
@@ -289,6 +365,18 @@ body {
     flex-direction: column;
     gap: 15px;
     margin-bottom: 15px;
+}
+
+.question-actions-inline .btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    min-width: 60px;
+}
+
+.edit-form {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px dashed #ddd;
 }
 
 .question-form input {
@@ -478,6 +566,15 @@ body {
     .question-actions {
         flex-direction: column;
         align-items: stretch;
+    }
+    
+    .question-item-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .question-actions-inline {
+        justify-content: center;
     }
     
     .modal-content {
