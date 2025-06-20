@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모아모아 맞추기</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <!-- 홈 화면 -->
+    <div id="home-screen" class="screen active">
+        <div class="container">
+            <h1 class="main-title">모아모아 맞추기</h1>
+            <div class="button-group">
+                <button id="start-game-btn" class="btn btn-primary">게임 시작</button>
+                <button id="admin-btn" class="btn btn-secondary">관리자</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 게임 화면 -->
+    <div id="game-screen" class="screen">
+        <div class="container">
+            <div class="game-header">
+                <h2 id="question-text">문제가 여기에 표시됩니다</h2>
+                <div class="game-controls">
+                    <span id="question-counter">1 / 5</span>
+                    <button id="end-game-btn" class="btn btn-danger">끝내기</button>
+                </div>
+            </div>
+            
+            <div class="game-content">
+                <div id="answer-area" class="answer-area">
+                    <div class="answer-placeholder">여기에 글자를 끌어다 놓으세요</div>
+                </div>
+                
+                <div id="drag-pool" class="drag-pool">
+                    <!-- 드래그 가능한 글자들이 여기에 생성됩니다 -->
+                </div>
+                
+                <div class="game-actions">
+                    <button id="check-answer-btn" class="btn btn-success">정답 확인</button>
+                    <button id="reset-answer-btn" class="btn btn-warning">다시 풀기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리자 화면 -->
+    <div id="admin-screen" class="screen">
+        <div class="container">
+            <div class="admin-header">
+                <h2>관리자 페이지</h2>
+                <div class="admin-controls">
+                    <button id="change-password-btn" class="btn btn-secondary">비밀번호 변경</button>
+                    <button id="admin-home-btn" class="btn btn-primary">홈으로</button>
+                </div>
+            </div>
+            
+            <div class="questions-container">
+                <h3>문제 관리 (최대 5문제)</h3>
+                <div id="questions-list">
+                    <!-- 문제 목록이 여기에 생성됩니다 -->
+                </div>
+                <button id="add-question-btn" class="btn btn-success">문제 추가</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비밀번호 모달 -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="password-modal-title">비밀번호 입력</h3>
+            <input type="password" id="password-input" placeholder="비밀번호를 입력하세요">
+            <div class="modal-actions">
+                <button id="password-confirm-btn" class="btn btn-primary">확인</button>
+                <button id="password-cancel-btn" class="btn btn-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 모달 -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="result-title">정답!</h3>
+            <p id="result-message">잘했어요!</p>
+            <div class="modal-actions">
+                <button id="result-next-btn" class="btn btn-primary">다음 문제</button>
+                <button id="result-home-btn" class="btn btn-secondary">홈으로</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 게임 완료 모달 -->
+    <div id="complete-modal" class="modal">
+        <div class="modal-content">
+            <h3>모든 문제 완료!</h3>
+            <p>수고했어요! 모든 문제를 풀었습니다.</p>
+            <div class="modal-actions">
+                <button id="complete-home-btn" class="btn btn-primary">홈으로</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
