@@ -287,23 +287,31 @@ function checkAnswer() {
     const resultTitle = document.getElementById('result-title');
     const resultMessage = document.getElementById('result-message');
     const resultNextBtn = document.getElementById('result-next-btn');
+    const resultRetryBtn = document.getElementById('result-retry-btn');
     
     if (userAnswer === correctAnswer) {
+        // 정답인 경우
         if (resultTitle) resultTitle.textContent = '정답!';
         if (resultMessage) resultMessage.textContent = '잘했어요!';
         if (resultNextBtn) resultNextBtn.style.display = 'inline-block';
+        if (resultRetryBtn) resultRetryBtn.style.display = 'none';
         showModal('result-modal');
     } else {
+        // 오답인 경우
         if (resultTitle) resultTitle.textContent = '오답!';
         if (resultMessage) resultMessage.textContent = '다시 도전해보세요!';
-        if (resultNextBtn) resultNextBtn.style.display = 'none';
+        if (resultNextBtn) {
+            resultNextBtn.style.display = 'inline-block';
+            resultNextBtn.textContent = '다음 문제';
+        }
+        if (resultRetryBtn) resultRetryBtn.style.display = 'inline-block';
         showModal('result-modal');
-        
-        // 글자 재섞기
-        setTimeout(() => {
-            resetAnswer();
-        }, 1500);
     }
+}
+
+function retryCurrentQuestion() {
+    hideModal('result-modal');
+    resetAnswer();
 }
 
 function resetAnswer() {
@@ -336,6 +344,11 @@ function nextQuestion() {
     currentQuestionIndex++;
     hideModal('result-modal');
     loadQuestion();
+}
+
+function retryCurrentQuestion() {
+    hideModal('result-modal');
+    resetAnswer();
 }
 
 // 모달 관리
@@ -689,10 +702,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 결과 모달 버튼들
     const resultNextBtn = document.getElementById('result-next-btn');
+    const resultRetryBtn = document.getElementById('result-retry-btn');
     const resultHomeBtn = document.getElementById('result-home-btn');
     
     if (resultNextBtn) {
         resultNextBtn.addEventListener('click', nextQuestion);
+    }
+    
+    if (resultRetryBtn) {
+        resultRetryBtn.addEventListener('click', retryCurrentQuestion);
     }
     
     if (resultHomeBtn) {
