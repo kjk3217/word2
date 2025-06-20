@@ -64,10 +64,29 @@
             
             <div class="questions-container">
                 <h3>문제 관리 (최대 5문제)</h3>
-                <div id="questions-list">
-                    <!-- 문제 목록이 여기에 생성됩니다 -->
+                
+                <!-- 새 문제 추가 폼 -->
+                <div class="add-question-section">
+                    <div class="question-form" id="add-question-form">
+                        <input type="text" id="new-question-input" placeholder="새 질문을 입력하세요">
+                        <input type="text" id="new-answer-input" placeholder="정답을 입력하세요">
+                        <input type="text" id="new-hint-input" placeholder="힌트를 입력하세요 (선택사항)">
+                    </div>
+                    <div class="add-question-actions">
+                        <button id="save-new-question-btn" class="btn btn-success">문제 추가</button>
+                    </div>
                 </div>
-                <button id="add-question-btn" class="btn btn-success">문제 추가</button>
+                
+                <!-- 문제 목록 -->
+                <div id="questions-list-container">
+                    <h4>등록된 문제 목록</h4>
+                    <div id="questions-list">
+                        <!-- 문제 목록이 여기에 동적으로 생성됩니다 -->
+                    </div>
+                    <div id="empty-message" style="display: none;">
+                        <p>아직 등록된 문제가 없습니다. 위에서 첫 번째 문제를 등록해보세요!</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
