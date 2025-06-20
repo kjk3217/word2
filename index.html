@@ -29,6 +29,7 @@
                 <h2 id="question-text">문제가 여기에 표시됩니다</h2>
                 <div class="game-controls">
                     <span id="question-counter">1 / 5</span>
+                    <button id="hint-btn" class="btn btn-info">힌트</button>
                     <button id="end-game-btn" class="btn btn-danger">끝내기</button>
                 </div>
             </div>
@@ -83,7 +84,16 @@
         </div>
     </div>
 
-    <!-- 결과 모달 -->
+    <!-- 힌트 모달 -->
+    <div id="hint-modal" class="modal">
+        <div class="modal-content">
+            <h3>💡 힌트</h3>
+            <p id="hint-text">힌트가 여기에 표시됩니다</p>
+            <div class="modal-actions">
+                <button id="hint-close-btn" class="btn btn-primary">확인</button>
+            </div>
+        </div>
+    </div>
     <div id="result-modal" class="modal">
         <div class="modal-content">
             <h3 id="result-title">정답!</h3>
