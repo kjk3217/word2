@@ -453,19 +453,6 @@ function showAdminPage() {
     isAdmin = true;
     showScreen('admin');
     renderQuestions();
-    
-    // 관리자 페이지 버튼 이벤트 리스너 재등록
-    setTimeout(() => {
-        const saveBtn = document.getElementById('save-new-question-btn');
-        if (saveBtn && !saveBtn.dataset.listenerAdded) {
-            console.log('문제 추가 버튼 이벤트 리스너 등록');
-            saveBtn.addEventListener('click', function() {
-                console.log('문제 추가 버튼 클릭됨');
-                window.addNewQuestion();
-            });
-            saveBtn.dataset.listenerAdded = 'true';
-        }
-    }, 100);
 }
 
 function showHint() {
@@ -562,10 +549,12 @@ function updateAddButtonState() {
             saveBtn.disabled = true;
             saveBtn.textContent = '최대 5문제 등록됨';
             saveBtn.style.opacity = '0.5';
+            saveBtn.onclick = null; // 비활성화 시 클릭 이벤트 제거
         } else {
             saveBtn.disabled = false;
             saveBtn.textContent = '문제 추가';
             saveBtn.style.opacity = '1';
+            saveBtn.onclick = window.addNewQuestion; // 활성화 시 클릭 이벤트 재등록
         }
     }
 }
@@ -743,7 +732,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 관리자 화면 버튼들
     const changePassBtn = document.getElementById('change-password-btn');
     const adminHomeBtn = document.getElementById('admin-home-btn');
-    const saveNewQuestionBtn = document.getElementById('save-new-question-btn');
     
     if (changePassBtn) {
         changePassBtn.addEventListener('click', changePassword);
@@ -753,12 +741,7 @@ document.addEventListener('DOMContentLoaded', function() {
         adminHomeBtn.addEventListener('click', () => showScreen('home'));
     }
     
-    if (saveNewQuestionBtn) {
-        saveNewQuestionBtn.addEventListener('click', function() {
-            console.log('문제 추가 버튼 이벤트 리스너 실행');
-            window.addNewQuestion();
-        });
-    }
+    // 문제 추가 버튼은 onclick 속성으로 처리하므로 여기서 제거
     
     // 결과 모달 버튼들
     const resultNextBtn = document.getElementById('result-next-btn');
